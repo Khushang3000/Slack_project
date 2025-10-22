@@ -1,0 +1,6 @@
+idea_app
+
+# removes all the node modules recursively.
+node_modules
+
+.env
