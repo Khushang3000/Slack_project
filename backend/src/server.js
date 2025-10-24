@@ -71,5 +71,6 @@ app.listen(ENV.PORT,()=>{
 //now when you do git add ., git commit -m, then when you do git push, do git push -u origin <branch_name>
 //that you just created.
 //when you merge the branch,go to another branch, usually main git checkout main just git branch -d db-config git push origin --delete db-config.
-
+//now, firstly go to main branch(checkout), then git pull origin main --rebase.(just adds the local commits, and keeps the remote branch up to date), and then lastly run git merge db-config.
+//now make sure you're on branch main, and then only delete the db-config branch which is merged already, git branch -D db-config.
 //now lastly, in this new section we'll work on authentication and deploying our api.
