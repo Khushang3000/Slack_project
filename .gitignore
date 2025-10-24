@@ -4,3 +4,5 @@ idea_app
 node_modules
 
 .env
+
+.gitignore
