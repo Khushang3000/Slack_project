@@ -108,7 +108,8 @@ const startServer =async ()=>{
         console.error("Error starting server", error);
         process.exit(1);//exit process with failure code
     }
-}//now we'll push this to github branch
+}//now we'll push this to github branch, now after we have fixed the inngest(where we removed connectDB, see it) in the next commit we'll have our deployed api.
+//also remember to not add the node_env environment variable
 
 startServer()
 
