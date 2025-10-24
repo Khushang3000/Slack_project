@@ -109,8 +109,13 @@ const startServer =async ()=>{
         process.exit(1);//exit process with failure code
     }
 }//now we'll push this to github branch, now after we have fixed the inngest(where we removed connectDB, see it) in the next commit we'll have our deployed api.
-//also remember to not add the node_env environment variable
+//also remember to not add the node_env environment variable, if the deployment fails just see the logs. they give you better idea of how to fix.
 
+//now firstly when you deploy the api, copy the site link, and in inngest cloud-> apps-> sync new app -> you'll see the signkey and below it, paste our deployed api's url.
+//also don't forget to add api/inngest to that url as that is our inngest, you can see it above as well, that serve thing, and there is where our functions go.
+//now sync app, you'll see two functions, now firstly delete the user from the frontend, by signing in first and then right through userbutton delete it.
+//now login again, in inngest you'll see a function running, that's sync user, and now you can even check your mongodb database, the user will be added.
+//in inngest under the runs tab, you can see the functions that are or have been ran before. and in mongodb your user would have been stored.
 startServer()
 
 export default app;
