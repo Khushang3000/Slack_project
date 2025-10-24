@@ -12,9 +12,9 @@ const syncUser = inngest.createFunction(//in this function we basically will jus
     async ({event})=>{
         //this is the function where we save the user in the database, so firstly let's create a user model. User.js or user.model.js
 
-        //first thing we'll do is connect with our database.
-        await connectDB();
-
+        // //first thing we'll do is connect with our database.
+        // await connectDB();
+        //NO NEED TO CONNECT TO THE DATABASE AS WE ALREADY DID THAT IN THE SERVER.JS, AS THE DATABASE CONNECTS AS SOON AS THE APP LISTENS ON A SERVER.
         const {id, email_addresses, first_name, last_name, image_url} = event.data;//if you remember in event catalog this is the kinda data we saw.
 
         const newUser = {

@@ -83,9 +83,7 @@ app.get('/',(req,res)=>{
 //now when you do git add ., git commit -m, then when you do git push, do git push -u origin <branch_name>
 //that you just created.
 //when you merge the branch,go to another branch, usually main git checkout main just git branch -d db-config git push origin --delete db-config.
-//now, firstly go to main branch(checkout), then git pull origin main --rebase(this keeps our local code/repo up to date with the remote repo, as we compare pull and merge the other branch's request on remote(github),
-//so we gotta keep our local code updated. after merging a branch to main you could go to main branch and then delete the merged branch or vice versa as it is your choice, as we just need to keep the local code updated with reference to the remote(where we compared pull request and merged it,
-//oh and btw, you directly create pull request of a branch by git push -u origin <branch_name>)).(just adds the local commits, and keeps the remote branch up to date), and then lastly run git merge db-config.
+//now, firstly go to main branch(checkout), then git pull origin main --rebase.(just adds the local commits, and keeps the remote branch up to date), and then lastly run git merge db-config.
 //now make sure you're on branch main, and then only delete the db-config branch which is merged already, git branch -D db-config.
 //now lastly, in this new section we'll work on authentication and deploying our api.
 //we'll implement auth in frontend. so go to that folder, delete app.css, clear out app.jsx, rafce and go there.
@@ -95,8 +93,7 @@ app.get('/',(req,res)=>{
 //since we'll be deploying on vercel, it doesn't want that our app listens on a single port everytime like we did in dev environment with localhost3000,
 const startServer =async ()=>{
     try {
-        await connectDB();//this connectDB runs as soon as our app is live on a port, or is live somewhere. all the other functions that we wrote above were
-        //acced through routes, and routes will only be available once app is setup on a server. i.e app has started listening.
+        await connectDB();
         if(ENV.NODE_ENV !== "production"){//only if the environment is dev, then listen on a port, if it's prod environment then don't listen to any port forever as our app will be deployed on vercel
 
             app.listen(ENV.PORT,()=>{
