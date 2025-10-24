@@ -3,11 +3,31 @@ import dotenv from "dotenv";
 import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { clerkMiddleware, requireAuth, getAuth } from '@clerk/express'
+import { functions, inngest } from './config/inngest.js';
+import { serve } from "inngest/express";
 
 const app = express();
 
+app.use(express.json())//this allows you to req.body where you have some json data.
 
 // const PORT=process.env.PORT||5001;
+
+
+
+// console.log('Mongodb url is', ENV.MONGODB_URI)//this runs on the server file, when this server file runs, and the .get is through express router.
+//as we don't need to log mongodb_uri to console.
+
+//using clerkMiddleware.
+app.use(clerkMiddleware())//with this we can basically check if the user is authenticated. this basically attaches an auth object to the req and through that we can check whether the user is authenticated or not.
+//like req.auth.isAuthenticated.
+// Use requireAuth() to protect this route
+// If user isn't authenticated, requireAuth() will redirect back to the homepage
+
+
+
+// Set up the "/api/inngest" (recommended) routes with the serve handler
+app.use("/api/inngest", serve({ client: inngest, functions }));
+
 
 //endpoint 
 app.get('/',(req,res)=>{
@@ -15,29 +35,21 @@ app.get('/',(req,res)=>{
     //remember res.send sends a string, but res.json sends the json object.
 })
 
-// console.log('Mongodb url is', ENV.MONGODB_URI)//this runs on the server file, when this server file runs, and the .get is through express router.
-//as we don't need to log mongodb_uri to console.
-
-// app.use(clerkMiddleware())
-// // Use requireAuth() to protect this route
-// // If user isn't authenticated, requireAuth() will redirect back to the homepage
-
-
 // // TO protect our routes. add this as a middleware.
 // app.get('/protected', requireAuth(), async (req, res) => {
 //   // Use `getAuth()` to get the user's `userId`
 //   const { userId } = getAuth(req)
-
+  
 //   // Use Clerk's JavaScript Backend SDK to get the user's User object
 //   const user = await clerkClient.users.getUser(userId)
 
 //   return res.json({ user })
 // })
 
-app.listen(ENV.PORT,()=>{
-    console.log("Server is listening on port", ENV.PORT);
-    connectDB();//connecting to database. right after server is running.
-})//now npm run dev and see the magic, now we can setup our other env variables like clerk when we'll use it for authentication or some other shi.
+// app.listen(ENV.PORT,()=>{
+//     console.log("Server is listening on port", ENV.PORT);
+//     connectDB();//connecting to database. right after server is running.
+// })//now npm run dev and see the magic, now we can setup our other env variables like clerk when we'll use it for authentication or some other shi.
 //so go to clerk  scroll down to clerk components. those are the ui components we'll be using., go to the dashboard
 // go to configure, configure settings there, remove email related ones, and just add google and apple and github, you can see the clerk component by clicking on the preview button.
 //now go to the overview and follow the steps to add the ui to our app, in frontend ofc.
@@ -74,3 +86,27 @@ app.listen(ENV.PORT,()=>{
 //now, firstly go to main branch(checkout), then git pull origin main --rebase.(just adds the local commits, and keeps the remote branch up to date), and then lastly run git merge db-config.
 //now make sure you're on branch main, and then only delete the db-config branch which is merged already, git branch -D db-config.
 //now lastly, in this new section we'll work on authentication and deploying our api.
+//we'll implement auth in frontend. so go to that folder, delete app.css, clear out app.jsx, rafce and go there.
+
+
+
+//since we'll be deploying on vercel, it doesn't want that our app listens on a single port everytime like we did in dev environment with localhost3000,
+const startServer =async ()=>{
+    try {
+        await connectDB();
+        if(ENV.NODE_ENV !== "production"){//only if the environment is dev, then listen on a port, if it's prod environment then don't listen to any port forever as our app will be deployed on vercel
+
+            app.listen(ENV.PORT,()=>{
+                console.log("Server is listening on port", ENV.PORT);
+                connectDB();//connecting to database. right after server is running.
+            })
+        }
+    } catch (error) {
+        console.error("Error starting server", error);
+        process.exit(1);//exit process with failure code
+    }
+}//now we'll push this to github branch
+
+startServer()
+
+export default app;
