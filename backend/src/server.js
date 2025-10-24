@@ -70,5 +70,6 @@ app.listen(ENV.PORT,()=>{
 // git reset --soft HEAD~1, if you want to delete one commit, and keep the changes, --hard if you also wanna remove the changes.
 //now when you do git add ., git commit -m, then when you do git push, do git push -u origin <branch_name>
 //that you just created.
+//when you merge the branch,go to another branch, usually main git checkout main just git branch -d db-config git push origin --delete db-config.
 
-//now lastly
+//now lastly, in this new section we'll work on authentication and deploying our api.
