@@ -1,3 +1,4 @@
+import "../instrument.mjs"//STEP1 FOR SENTRY, STEP 2 IS WAY BELOW.
 import express from 'express';
 import dotenv from "dotenv";
 import { ENV } from './config/env.js';
@@ -5,6 +6,10 @@ import { connectDB } from './config/db.js';
 import { clerkMiddleware, requireAuth, getAuth } from '@clerk/express'
 import { functions, inngest } from './config/inngest.js';
 import { serve } from "inngest/express";
+import chatRoutes from './routes/chat.route.js'
+
+import { ENV } from "./src/config/env.js";
+import * as Sentry from '@sentry/node';
 
 const app = express();
 
@@ -23,17 +28,20 @@ app.use(clerkMiddleware())//with this we can basically check if the user is auth
 // Use requireAuth() to protect this route
 // If user isn't authenticated, requireAuth() will redirect back to the homepage
 
-
-
-// Set up the "/api/inngest" (recommended) routes with the serve handler
-app.use("/api/inngest", serve({ client: inngest, functions }));
-
+app.get("debug-sentry",(req, res)=>{
+    throw new Error("My First Sentry Error.")
+})
 
 //endpoint 
 app.get('/',(req,res)=>{
     res.send('Hello World');
     //remember res.send sends a string, but res.json sends the json object.
 })
+
+// Set up the "/api/inngest" (recommended) routes with the serve handler
+app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use("api/chat", chatRoutes);
+
 
 // // TO protect our routes. add this as a middleware.
 // app.get('/protected', requireAuth(), async (req, res) => {
@@ -91,6 +99,10 @@ app.get('/',(req,res)=>{
 //we'll implement auth in frontend. so go to that folder, delete app.css, clear out app.jsx, rafce and go there.
 
 
+// STEP2 FOR SENTRY- after you have written all the requests, 
+Sentry.setupExpressErrorHandler(app); //and we're done setting up our app for express. also see the sentry-debug error route where we are intentionally throwing an error so that we can check on sentry.
+//now the last thing is in our package.json scripts add NODE_OPTIONS='--import ./instrument.mjs'.
+//now just npm run dev, and visit the endpoint, and since the error is thrown, you'll get it's report in your sentry account. but before that rename instrument.js to .mjs.
 
 //since we'll be deploying on vercel, it doesn't want that our app listens on a single port everytime like we did in dev environment with localhost3000,
 const startServer =async ()=>{
@@ -116,6 +128,10 @@ const startServer =async ()=>{
 //now sync app, you'll see two functions, now firstly delete the user from the frontend, by signing in first and then right through userbutton delete it.
 //now login again, in inngest you'll see a function running, that's sync user, and now you can even check your mongodb database, the user will be added.
 //in inngest under the runs tab, you can see the functions that are or have been ran before. and in mongodb your user would have been stored.
+
+//now in this commit we'll do the stream setup. since we're adding user to mongodb on successful clerk login, we'll also do a stream setup where we will store that user in stream database as stream needs info like user profile image and much more.
+//and how they'll send messages between different users. now before we install stream in our backend. npm i stream-chat
+//and then create a config file called stream.js.
 startServer()
 
 export default app;
