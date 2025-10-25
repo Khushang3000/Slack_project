@@ -103,6 +103,7 @@ app.use("api/chat", chatRoutes);
 Sentry.setupExpressErrorHandler(app); //and we're done setting up our app for express. also see the sentry-debug error route where we are intentionally throwing an error so that we can check on sentry.
 //now the last thing is in our package.json scripts add NODE_OPTIONS='--import ./instrument.mjs'.
 //now just npm run dev, and visit the endpoint, and since the error is thrown, you'll get it's report in your sentry account. but before that rename instrument.js to .mjs.
+//
 
 //since we'll be deploying on vercel, it doesn't want that our app listens on a single port everytime like we did in dev environment with localhost3000,
 const startServer =async ()=>{
