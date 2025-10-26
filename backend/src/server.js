@@ -103,7 +103,12 @@ app.use("api/chat", chatRoutes);
 Sentry.setupExpressErrorHandler(app); //and we're done setting up our app for express. also see the sentry-debug error route where we are intentionally throwing an error so that we can check on sentry.
 //now the last thing is in our package.json scripts add NODE_OPTIONS='--import ./instrument.mjs'.
 //now just npm run dev, and visit the endpoint, and since the error is thrown, you'll get it's report in your sentry account. but before that rename instrument.js to .mjs.
-//
+//now in next commit we'll get started with the auth page. that'll be frontend, so go there create the components, pages and styles folder, 
+//under styles create auth.css file, you can see it and hell even you could generate it with ai.now we're gonna install react-router-dom, well it was the older name, now it's just react-router, npm i react-router
+// n then wrap the app component with the browser router component.
+//now create authpage and home page, in the pages folder. now see app.jsx
+
+
 
 //since we'll be deploying on vercel, it doesn't want that our app listens on a single port everytime like we did in dev environment with localhost3000,
 const startServer =async ()=>{
