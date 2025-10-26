@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { ClerkProvider } from '@clerk/clerk-react'
+import {BrowserRouter} from 'react-router'
 
 
 // Import your Publishable Key
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* wrapping our application with clerk provider. now just go and create the app with clerk component. */}
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <BrowserRouter>
         <App />
+      </BrowserRouter>
     </ClerkProvider>
   </StrictMode>,
 )

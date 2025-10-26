@@ -6,19 +6,32 @@ import React from 'react'
 //then get it in the main.jsx. go
 //after getting thte components here, let's run npm run dev
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';//importing first ofc.
+import { Navigate, Route, Routes } from 'react-router';
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
 
 
 
 const App = () => {
   return (
-    <header>
+    <>
       <SignedOut>
-        {/* if user is signed out show a sign in button. */}
-        <SignInButton mode="modal" />
+        {/* if user is signed out show these routes*/}
+        <Routes>
+          {/* if path is /auth and user is signedout, then show the homepage. */}
+          <Route path='/auth' element={<AuthPage/>}/>
+          {/* if user is signed-out and wants to visit any other page then send them to the auth page. */}
+          <Route path='*' element={<Navigate to={"/auth"} replace/>}/>
+        </Routes>
       </SignedOut>
       <SignedIn>
-        {/* if user is signed in then show a user button. */}
-        <UserButton />
+        {/* if user is signed in then show some couple of routes */}
+        <Routes>
+          {/* if path is / and user is signed in, then show the homepage. */}
+          <Route path="/" element={<HomePage />} />
+          {/* if user is already signed in and tries to visit auth page then take them back to the homepage. */}
+          <Route path="/auth" element={<Navigate to={"/"} replace/>} />
+        </Routes>
       </SignedIn>
       {/* now when you first click the sign in button, it'll take you to the clerk auth page, where you can see the apple github and google sign in buttons which you can configure in the configure tab in clerk.
       but if we give the mode="modal", to the signinbutton, that signin page provided by clerk will be shown as a modal. make sure to use " " 
@@ -54,7 +67,7 @@ const App = () => {
       // now go to inngest cloud, apps, and we'll sync a new application. but first let's write those background jobs/functions that are gonna interact with the database according to the webhook we get
       // before that you can go to inngest express or nodejs documentation. follow the setup steps. npm i inngest,
       // then skip the dev server one as we don't need to run the dev server. and lastly we will write the inngest.js file under the config folder where all our jobs or functions will go.*/}
-    </header>
+    </>
   )
 }
 
