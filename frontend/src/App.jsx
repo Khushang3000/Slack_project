@@ -9,12 +9,14 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-reac
 import { Navigate, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
+// import toast from 'react-hot-toast';
 
 
 
 const App = () => {
   return (
     <>
+      {/* <button onClick={()=>{toast.success("Congrats")}}>success</button> */}
       <SignedOut>
         {/* if user is signed out show these routes*/}
         <Routes>

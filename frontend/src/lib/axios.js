@@ -1,0 +1,1 @@
+//if it's dev environment then server will be on localhost,but if it's live then on some url, so get your backend url from vercel.
