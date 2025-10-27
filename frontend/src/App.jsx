@@ -10,30 +10,40 @@ import { Navigate, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 // import toast from 'react-hot-toast';
+import * as Sentry from "@sentry/react";
 
-
+//SENTRY
+  const SentryRoutes = Sentry.withSentryReactRouterV7Routing(Routes); 
 
 const App = () => {
+  
+
+
   return (
     <>
+      <button onClick={()=>{
+        throw new Error("My test error from App.jsx")
+      }}>
+        THROW ERROR
+      </button>
       {/* <button onClick={()=>{toast.success("Congrats")}}>success</button> */}
       <SignedOut>
         {/* if user is signed out show these routes*/}
-        <Routes>
+        <SentryRoutes>
           {/* if path is /auth and user is signedout, then show the homepage. */}
           <Route path='/auth' element={<AuthPage/>}/>
           {/* if user is signed-out and wants to visit any other page then send them to the auth page. */}
           <Route path='*' element={<Navigate to={"/auth"} replace/>}/>
-        </Routes>
+        </SentryRoutes>
       </SignedOut>
       <SignedIn>
         {/* if user is signed in then show some couple of routes */}
-        <Routes>
+        <SentryRoutes>
           {/* if path is / and user is signed in, then show the homepage. */}
           <Route path="/" element={<HomePage />} />
           {/* if user is already signed in and tries to visit auth page then take them back to the homepage. */}
           <Route path="/auth" element={<Navigate to={"/"} replace/>} />
-        </Routes>
+        </SentryRoutes>
       </SignedIn>
       {/* now when you first click the sign in button, it'll take you to the clerk auth page, where you can see the apple github and google sign in buttons which you can configure in the configure tab in clerk.
       but if we give the mode="modal", to the signinbutton, that signin page provided by clerk will be shown as a modal. make sure to use " " 
