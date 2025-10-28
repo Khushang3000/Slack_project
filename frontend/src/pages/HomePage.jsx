@@ -3,7 +3,7 @@ import React from 'react'
 
 const HomePage = () => {
   return (
-    <div>
+    <div className='bg-red-300'>
         {/* userbutton to signout */}
         <UserButton/>
         Home page.    

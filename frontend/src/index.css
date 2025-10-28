@@ -1,9 +1,12 @@
-* { /*select everything, and remove the margins*/
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
+@import "tailwindcss";
+/* tailwindcss will already include the below styles. */
 
-body {
-    font-family: "Inter",sans-serif; /*if inter ain't available then it'll use sans serif.*/
-}
+/* * { select everything, and remove the margins */
+/* margin: 0;
+padding: 0;
+box-sizing: border-box; */
+/* } */
+
+/* body { */
+    /* font-family: "Inter",sans-serif; if inter ain't available then it'll use sans serif. */
+/* } */
