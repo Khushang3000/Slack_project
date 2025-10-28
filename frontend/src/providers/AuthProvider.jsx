@@ -56,3 +56,6 @@ export default function AuthProvider({children}){
 //in the upcomming sections we can add some buttons just to test this out or if we have any errors then we can see those in the sentry dashboard. also create a button under app.jsx which onclick throws a error(error thrown on the frontend), which we'll see in sentry frontend project.
 //our brave has adblocker which might stop the app's button to send a error post request to sentry, so run the app on edge.
 //now when you go to sentry/issues/feed you can see the error report.
+
+// now in this commit we'll create a custom hook which we'll use to get the channels, direct messages nd shi.
+//hooks/useStreamChat.js
