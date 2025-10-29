@@ -18,8 +18,8 @@ const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 // it also handles the disconnection when user leaves the page.
 
 export const useStreamChat = ()=>{
-    const {user} = useUser;
-    const {chatClient, setChatClient} = useState(null);
+    const {user} = useUser();
+    const [chatClient, setChatClient] = useState(null);
 
     //fetch stream token using tanstack react-query.
     const {data: tokenData, isLoading: tokenLoading, error: tokenError} = useQuery({//renaming data to tokenData, isLoading to tokenLoading and similarly error
@@ -28,11 +28,13 @@ export const useStreamChat = ()=>{
         enabled: !!user.id, //this will take the object and convert it to a boolean value.
         // we did this because we only want this query to run when the user is authenticated.
     });
+    
 
     // initialize stream-chat-client
     useEffect(() => {
       const initChat = async ()=>{
-        if(!tokenData.token || !user){
+        
+        if(!tokenData?.token || !user){
             // if there's no token or user 
             return;
         }
@@ -44,8 +46,8 @@ export const useStreamChat = ()=>{
             await client.connectUser({
                 id: user.id,
                 name: user.fullName,
-                image: user.imageUrl
-            })
+                image: user.imageUrl,
+            },tokenData.token)
             setChatClient(client);
 
         } catch (error) {
@@ -65,11 +67,12 @@ export const useStreamChat = ()=>{
     //   cleanup
     return ()=>{
         // this means when the tab was closed, so when the app is closed, it means that user is offline, and that's why we're using this disconnectUser.
-        if(chatClient) chatClient.disconnectUser
+        if(chatClient) chatClient.disconnectUser()
     }
     }, [tokenData,user,chatClient])//run it whenever tokenData or user changes.
 
-    return {chatClient, tokenLoading, error}//now we'll be using these fields in ui, later.
+    return {chatClient, tokenLoading, tokenError}//now we'll be using these fields in ui, later.
     // now in next commit we'll work on the homepage ui.
+    // so go there.
     
 }

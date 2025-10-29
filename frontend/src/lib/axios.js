@@ -10,11 +10,11 @@
 //our server is runnign on https://slack-backend-flame.vercel.app
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.MODE === "development" ?"http://localhost:5001" : "https://slack-backend-flame.vercel.app/api" 
+const BASE_URL = import.meta.env.MODE === "development" ?"http://localhost:5001/api" : "https://slack-backend-flame.vercel.app/api" 
 
 export const axiosInstance = axios.create({
     baseURL: BASE_URL,
-    withCredentials: true//it means that on every single request just include the credentials.
+    withCredentials: true,//it means that on every single request just include the credentials.
     // basically we'll send our token in the headers.
     //now create a providers folder and AuthProvider.jsx
 })

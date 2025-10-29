@@ -3,11 +3,12 @@ import express from 'express';
 import dotenv from "dotenv";
 import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
-import { clerkMiddleware, requireAuth, getAuth } from '@clerk/express'
+import { clerkMiddleware, requireAuth, getAuth} from '@clerk/express'
+
 import { functions, inngest } from './config/inngest.js';
 import { serve } from "inngest/express";
 import chatRoutes from './routes/chat.route.js'
-
+import cors from 'cors'
 import * as Sentry from '@sentry/node';
 
 const app = express();
@@ -15,7 +16,7 @@ const app = express();
 app.use(express.json())//this allows you to req.body where you have some json data.
 
 // const PORT=process.env.PORT||5001;
-
+app.use(cors({origin: "http://localhost:5173", credentials: true}))//credentials: true allows users to send cookies, in which they can send the token
 
 
 // console.log('Mongodb url is', ENV.MONGODB_URI)//this runs on the server file, when this server file runs, and the .get is through express router.
@@ -39,7 +40,7 @@ app.get('/',(req,res)=>{
 
 // Set up the "/api/inngest" (recommended) routes with the serve handler
 app.use("/api/inngest", serve({ client: inngest, functions }));
-app.use("api/chat", chatRoutes);
+app.use("/api/chat", requireAuth(),chatRoutes);
 
 
 // // TO protect our routes. add this as a middleware.
