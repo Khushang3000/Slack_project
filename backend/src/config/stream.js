@@ -36,3 +36,13 @@ export const generateStreamToken = (userId) => {
         return null;
     }
 }//now go to server.js, and add stream's middleware for auth, right below api/inngest, chatRoutes come from route/chat.route.js
+
+
+
+export const addUserToPublicChannels = async (newUserId) => {//adding the user to public channels.
+  const publicChannels = await streamClient.queryChannels({ discoverable: true });
+
+  for (const channel of publicChannels) {
+    await channel.addMembers([newUserId]);
+  }
+};

@@ -6,8 +6,11 @@ import { useStreamChat } from '../hooks/useStreamChat';
 import PageLoader from '../components/PageLoader';
 import "../styles/stream-chat-theme.css"
 import {Chat, Channel, ChannelList, MessageList, MessageInput, Thread, Window} from 'stream-chat-react'
-import { PlusIcon } from 'lucide-react';
+import { List, PlusIcon } from 'lucide-react';
 import CreateChannelModal from '../components/CreateChannelModal';
+import { HashIcon,UsersIcon } from 'lucide-react';
+import CustomChannelPreview from '../components/CustomChannelPreview';
+import UsersList from '../components/UsersList';
 
 
 const HomePage = () => {
@@ -73,7 +76,46 @@ const HomePage = () => {
                     <span>Create Channel</span>
                   </button>
                 </div>
-                {/* Channel list component */}
+                {/* Channel list component, this component displays all the channels that the user is a part of. and after this we'll complete the direct messages part as well.*/}
+                <ChannelList 
+                // here filters gives us all the channels that user has joined.
+                //options keeps it realtime.
+                //preview allows us to render our custom components. if we don't use preview then stream is going to give us a default component.
+                filters={{members: {$in: [chatClient?.user?.id]}}}
+                options={{state: true, watch: true}}
+                Preview={(channel)=>(
+                  <CustomChannelPreview 
+                  channel={channel}
+                  activeChannel={activeChannel}
+                  setActiveChannel={(channel)=>setSearchParams({channel: channel.id})}
+                  />
+                )}
+                List={({children, loading, error})=>(
+                  <div className="channel-sections">
+                    <div className="section-header">
+                        <div className="section-title">
+                          <HashIcon className="size-4" />
+                          <span>Channels</span>
+                        </div>
+                      </div>
+                      
+                      {/* todos: add better components here instead of just a simple text  */}
+                      {loading && <div className="loading-message">Loading channels...</div>}
+                      {error && <div className="error-message">Error loading channels</div>}
+
+                      <div className="channels-list">{children}</div>
+
+                      <div className="section-header direct-messages">
+                        <div className="section-title">
+                          <UsersIcon className="size-4" />
+                          <span>Direct Messages</span>
+                        </div>
+                      </div>
+                      <UsersList activeChannel={activeChannel} />
+                  </div>
+                )}
+                
+                />
               </div>
             </div>
           </div>

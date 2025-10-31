@@ -304,5 +304,6 @@ const CreateChannelModal = ({onClose}) => {
 }
 // now go and try creating the channel throught the frontend, and then in your stream account you'll see the channel and all it's info like visibility n shi, also it will have the
 // custom field we added->discoverable,rn we have done the homepage channel setup now in next section we'll do homepage's direct messages setup
+// go to homepage and there we'll implement the channelList component.
 
 export default CreateChannelModal
