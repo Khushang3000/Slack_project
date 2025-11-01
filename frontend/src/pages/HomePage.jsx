@@ -41,6 +41,18 @@ const HomePage = () => {
     
     
   }, [chatClient, searchParams])//run this when the chatClient or searchParams update.
+  useEffect(() => {
+  if (!chatClient) return;
+
+  (async () => {
+    const channels = await chatClient.queryChannels({
+      type: "messaging",
+      members: { $in: [chatClient.user.id] },
+    });
+    console.log("Manually queried channels:", channels.map(c => c.id));
+  })();
+}, [chatClient]);
+
   
   if(error){
       // handle this with a better component.
@@ -77,28 +89,34 @@ const HomePage = () => {
                   </button>
                 </div>
                 {/* Channel list component, this component displays all the channels that the user is a part of. and after this we'll complete the direct messages part as well.*/}
-                <ChannelList 
-                // here filters gives us all the channels that user has joined.
-                //options keeps it realtime.
-                //preview allows us to render our custom components. if we don't use preview then stream is going to give us a default component.
-                filters={{members: {$in: [chatClient?.user?.id]}}}
-                options={{state: true, watch: true}}
-                Preview={(channel)=>(
-                  <CustomChannelPreview 
-                  channel={channel}
-                  activeChannel={activeChannel}
-                  setActiveChannel={(channel)=>setSearchParams({channel: channel.id})}
-                  />
-                )}
-                List={({children, loading, error})=>(
-                  <div className="channel-sections">
-                    <div className="section-header">
+                
+               
+                
+                
+                               <ChannelList
+  filters={{
+    type: "messaging",
+    members: { $in: [chatClient.user.id] },
+  }}
+  options={{ state: true, watch: true }}
+  Preview={(previewProps) => (
+    <CustomChannelPreview
+      channel={previewProps.channel}
+      activeChannel={activeChannel}
+      setActiveChannel={(channel) =>
+        setSearchParams({ channel: channel.id })
+      }
+    />
+  )}
+  List={({ children, loading, error }) => (
+                    <div className="channel-sections">
+                      <div className="section-header">
                         <div className="section-title">
                           <HashIcon className="size-4" />
                           <span>Channels</span>
                         </div>
                       </div>
-                      
+
                       {/* todos: add better components here instead of just a simple text  */}
                       {loading && <div className="loading-message">Loading channels...</div>}
                       {error && <div className="error-message">Error loading channels</div>}
@@ -112,10 +130,15 @@ const HomePage = () => {
                         </div>
                       </div>
                       <UsersList activeChannel={activeChannel} />
-                  </div>
-                )}
-                
+                    </div>
+                  )}
                 />
+
+
+                  
+
+
+                
               </div>
             </div>
           </div>

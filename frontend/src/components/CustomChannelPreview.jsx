@@ -2,6 +2,9 @@ import { HashIcon } from 'lucide-react';
 import React from 'react'
 
 const CustomChannelPreview = ({channel, activeChannel, setActiveChannel}) => {
+  // Guard clause: skip rendering if channel or channel.data is missing
+  if (!channel || !channel.data) return null;
+  
     const isActive = activeChannel && activeChannel.id === channel.id;//if channel exists and if the channel's id is equal to current selected channel's id.
     const isDm = channel.data.member_count === 2 && channel.data.id.includes("user_");//if members in channel are 2, and the id starts with user_ then this is a direct message channel
     //go to clerk dashboard, users, view user's profile, there you'll see a userId field the id starts with user_ so with this we can understand if this is a dm or not.

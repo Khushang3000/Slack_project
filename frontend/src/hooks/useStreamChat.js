@@ -30,6 +30,7 @@ export const useStreamChat = ()=>{
     });
     
 
+
     // initialize stream-chat-client
     useEffect(() => {
       const initChat = async ()=>{

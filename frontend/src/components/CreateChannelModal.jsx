@@ -231,7 +231,7 @@ const CreateChannelModal = ({onClose}) => {
                             <button 
                             type='button' 
                             className='btn btn-secondary btn-small' 
-                            onClick={setSelectedMembers(users.map((u)=>u.id))} 
+                            onClick={()=>setSelectedMembers(users.map((u)=>u.id))} 
                             disabled={loadingUsers || users.length===0}>
                                 <UsersIcon className="w-4 h-4" />
                                 Select Everyone
