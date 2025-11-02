@@ -13,7 +13,7 @@ const CustomChannelPreview = ({channel, activeChannel, setActiveChannel}) => {
         return null;
     }
 
-    const unreadCount = channel.unreadCount;
+    const unreadCount = channel.countUnread();
   return (
     <button
       onClick={() => setActiveChannel(channel)}

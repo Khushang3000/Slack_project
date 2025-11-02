@@ -134,6 +134,11 @@ await channel.watch();
 }
 // rn our app is working but, there's a problem, the public channels aren't visible to users, to fix that we can go to backend/inngest.js and add
 //and addusertopublic channels. that's why we used The discoverable field while creating the channel.
-//now in next commit we'll work on channel header setup.
+//now in next commit we'll work on channel header setup. before that we fixed the homepage, where we were giving filters and preview the wrong way.
+// oh and btw the previous stream chat sdk's allowed us to select what we wanna send, like file/poll/location but now it's changed, it only allows us to upload files, there's no option for poll or anything.
+// to make them available, go to stream dashboard, channel types/messaging, you can enable polls and location sharing from there.
+//also when the channel has some new/unread messages then the notification icon doesn't pop up on that channel, we fix that first.
+// in customChannelPreview, instead of channel.unreadCount do channel.countUnread()
+// now all functionalities are working and in next commit we'll work on channel header
 
 export default UsersList
