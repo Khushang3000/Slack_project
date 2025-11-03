@@ -1,53 +1,72 @@
-import React from 'react'
+import React from "react";
 //now firstly get rid of the assets. and also clear out index.css.
 //oh and env.local is our env file here.
 // now go to clerk auth, select the project, and then select react. follow sdk.
 //add publishable key in env file.
 //then get it in the main.jsx. go
 //after getting thte components here, let's run npm run dev
-import { SignedIn, SignedOut, SignInButton, useAuth, UserButton } from '@clerk/clerk-react';//importing first ofc.
-import { Navigate, Route, Routes } from 'react-router';
-import HomePage from './pages/HomePage.jsx';
-import AuthPage from './pages/AuthPage.jsx';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+  UserButton,
+} from "@clerk/clerk-react"; //importing first ofc.
+import { Navigate, Route, Routes } from "react-router";
+import HomePage from "./pages/HomePage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 // import toast from 'react-hot-toast';
 import * as Sentry from "@sentry/react";
-import CallPage from './pages/CallPage.jsx';
+import CallPage from "./pages/CallPage.jsx";
 
 //SENTRY
-  const SentryRoutes = Sentry.withSentryReactRouterV7Routing(Routes); 
+const SentryRoutes = Sentry.withSentryReactRouterV7Routing(Routes);
 
 const App = () => {
-  
-  const {isSignedIn, isLoaded} = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
   // if clerk isn't loaded just return null untill it is loaded
-  if(!isLoaded) return null;
+  if (!isLoaded) return null;
   return (
     <SentryRoutes>
+      {/* 2nd/updated version of routing */}
+      {/* if path is / and user si signedIn then show them the home page, otherwise take them to the auth page. */}
+      <Route
+        path="/"
+        element={isSignedIn ? <HomePage /> : <Navigate to={"/auth"} replace />}
+      />
 
-    {/* 2nd/updated version of routing */}
-    {/* if path is / and user si signedIn then show them the home page, otherwise take them to the auth page. */}
-    <Route path="/" element= {isSignedIn? <HomePage/>: <Navigate to={"/auth"} replace/>}/>
+      {/* if path is /auth and user is signedIn then take them to the home page, if user not signedIn then take them to auth page */}
+      <Route
+        path="/auth"
+        element={!isSignedIn ? <AuthPage /> : <Navigate to={"/"} replace />}
+      />
 
-    {/* if path is /auth and user is signedIn then take them to the home page, if user not signedIn then take them to auth page */}
-    <Route path="/auth" element= {!isSignedIn? <AuthPage/>: <Navigate to={"/"} replace/>}/>
+      {/* dynamic page call. */}
+      <Route
+        path="/call/:id"
+        element={isSignedIn ? <CallPage /> : <Navigate to={"/auth"} replace />}
+      />
 
-    {/* dynamic page call. */}
-    <Route path="/call/:id" element= {isSignedIn? <CallPage/>: <Navigate to={"/auth"} replace/>}/>
+      <Route
+        path="*"
+        element={
+          isSignedIn ? (
+            <Navigate to={"/"} replace />
+          ) : (
+            <Navigate to={"/auth"} replace />
+          )
+        }
+      />
 
+      {/* this version of routing is faster than the previous one because the signedIn and signedOut components took a bit time to load on the client side. */}
 
-    <Route path="*" element= {isSignedIn? <Navigate to={"/"} replace />: <Navigate to={"/auth"} replace/>}/>
-
-    {/* this version of routing is faster than the previous one because the signedIn and signedOut components took a bit time to load on the client side. */}
-
-    {/* <button onClick={()=>{
+      {/* <button onClick={()=>{
         throw new Error("My test error from App.jsx")
       }}>
         THROW ERROR
       </button> */}
       {/* <button onClick={()=>{toast.success("Congrats")}}>success</button> */}
 
-      
-      
       {/* now when you first click the sign in button, it'll take you to the clerk auth page, where you can see the apple github and google sign in buttons which you can configure in the configure tab in clerk.
       but if we give the mode="modal", to the signinbutton, that signin page provided by clerk will be shown as a modal. make sure to use " " 
       now sign up, and once you as a user are authenticated, it'll show the user's photo in a circle, basically a user button,
@@ -83,28 +102,47 @@ const App = () => {
       // before that you can go to inngest express or nodejs documentation. follow the setup steps. npm i inngest,
       // then skip the dev server one as we don't need to run the dev server. and lastly we will write the inngest.js file under the config folder where all our jobs or functions will go.*/}
     </SentryRoutes>
-    
-  )
-}
+  );
+};
 
-export default App
+export default App;
 
 // First version of Routing.
-{/* <SignedOut> */}
-        {/* if user is signed out show these routes*/}
-        {/* <SentryRoutes> */}
-          {/* if path is /auth and user is signedout, then show the homepage. */}
-          {/* <Route path='/auth' element={<AuthPage/>}/> */}
-          {/* if user is signed-out and wants to visit any other page then send them to the auth page. */}
-          {/* <Route path='*' element={<Navigate to={"/auth"} replace/>}/>
+{
+  /* <SignedOut> */
+}
+{
+  /* if user is signed out show these routes*/
+}
+{
+  /* <SentryRoutes> */
+}
+{
+  /* if path is /auth and user is signedout, then show the homepage. */
+}
+{
+  /* <Route path='/auth' element={<AuthPage/>}/> */
+}
+{
+  /* if user is signed-out and wants to visit any other page then send them to the auth page. */
+}
+{
+  /* <Route path='*' element={<Navigate to={"/auth"} replace/>}/>
         </SentryRoutes>
-</SignedOut> */}
-      // <SignedIn>
-        {/* if user is signed in then show some couple of routes */}
-        // <SentryRoutes>
-          {/* if path is / and user is signed in, then show the homepage. */}
-          // <Route path="/" element={<HomePage />} />
-          {/* if user is already signed in and tries to visit auth page then take them back to the homepage. */}
-          // <Route path="/auth" element={<Navigate to={"/"} replace/>} />
-        // </SentryRoutes>
-      // </SignedIn>
+</SignedOut> */
+}
+// <SignedIn>
+{
+  /* if user is signed in then show some couple of routes */
+}
+// <SentryRoutes>
+{
+  /* if path is / and user is signed in, then show the homepage. */
+}
+// <Route path="/" element={<HomePage />} />
+{
+  /* if user is already signed in and tries to visit auth page then take them back to the homepage. */
+}
+// <Route path="/auth" element={<Navigate to={"/"} replace/>} />
+// </SentryRoutes>
+// </SignedIn>

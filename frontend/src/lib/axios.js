@@ -6,15 +6,18 @@
 // The simplest and most universal approach is just importing the module manually at the top of your entry file (e.g., server.js):
 //soo we removed NODE_OPTIONS='--import ./instrument.mjs' or cross-env NODE_OPTIONS='--import ./instrument.mjs'
 
-// now let's get back to setting up authProvider 
+// now let's get back to setting up authProvider
 //our server is runnign on https://slack-backend-flame.vercel.app
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL = import.meta.env.MODE === "development" ?"http://localhost:5001/api" : "https://slack-backend-flame.vercel.app/api" 
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:5001/api"
+    : "https://slack-backend-flame.vercel.app/api";
 
 export const axiosInstance = axios.create({
-    baseURL: BASE_URL,
-    withCredentials: true,//it means that on every single request just include the credentials.
-    // basically we'll send our token in the headers.
-    //now create a providers folder and AuthProvider.jsx
-})
+  baseURL: BASE_URL,
+  withCredentials: true, //it means that on every single request just include the credentials.
+  // basically we'll send our token in the headers.
+  //now create a providers folder and AuthProvider.jsx
+});

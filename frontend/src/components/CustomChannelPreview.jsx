@@ -1,19 +1,20 @@
-import { HashIcon } from 'lucide-react';
-import React from 'react'
+import { HashIcon } from "lucide-react";
+import React from "react";
 
-const CustomChannelPreview = ({channel, activeChannel, setActiveChannel}) => {
+const CustomChannelPreview = ({ channel, activeChannel, setActiveChannel }) => {
   // Guard clause: skip rendering if channel or channel.data is missing
   if (!channel || !channel.data) return null;
-  
-    const isActive = activeChannel && activeChannel.id === channel.id;//if channel exists and if the channel's id is equal to current selected channel's id.
-    const isDm = channel.data.member_count === 2 && channel.data.id.includes("user_");//if members in channel are 2, and the id starts with user_ then this is a direct message channel
-    //go to clerk dashboard, users, view user's profile, there you'll see a userId field the id starts with user_ so with this we can understand if this is a dm or not.
 
-    if(isDm){
-        return null;
-    }
+  const isActive = activeChannel && activeChannel.id === channel.id; //if channel exists and if the channel's id is equal to current selected channel's id.
+  const isDm =
+    channel.data.member_count === 2 && channel.data.id.includes("user_"); //if members in channel are 2, and the id starts with user_ then this is a direct message channel
+  //go to clerk dashboard, users, view user's profile, there you'll see a userId field the id starts with user_ so with this we can understand if this is a dm or not.
 
-    const unreadCount = channel.countUnread();
+  if (isDm) {
+    return null;
+  }
+
+  const unreadCount = channel.countUnread();
   return (
     <button
       onClick={() => setActiveChannel(channel)}
@@ -23,17 +24,17 @@ const CustomChannelPreview = ({channel, activeChannel, setActiveChannel}) => {
           : ""
       }`}
     >
-        <HashIcon className="w-4 h-4 text-[#9b9b9b] mr-2" />
-      <span className="str-chat__channel-preview-messenger-name flex-1">{channel.data.id}</span>
-      {unreadCount > 0 && (//if unreadCount > 0 only then we'll show it.
+      <HashIcon className="w-4 h-4 text-[#9b9b9b] mr-2" />
+      <span className="str-chat__channel-preview-messenger-name flex-1">
+        {channel.data.id}
+      </span>
+      {unreadCount > 0 && ( //if unreadCount > 0 only then we'll show it.
         <span className="flex items-center justify-center ml-2 size-4 text-xs rounded-full bg-red-500 ">
           {unreadCount}
         </span>
-        
       )}
-
     </button>
-  )
-}
+  );
+};
 
-export default CustomChannelPreview
+export default CustomChannelPreview;

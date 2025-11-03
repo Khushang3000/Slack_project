@@ -1,12 +1,18 @@
-import React from 'react'
+import React from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { imageToLink, useChatContext, UserItem } from "stream-chat-react";
 import * as Sentry from "@sentry/react";
 import toast from "react-hot-toast";
-import { AlertCircleIcon, HashIcon, LockIcon, UsersIcon, XIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  HashIcon,
+  LockIcon,
+  UsersIcon,
+  XIcon,
+} from "lucide-react";
 
-const CreateChannelModal = ({onClose}) => {
+const CreateChannelModal = ({ onClose }) => {
   const [channelName, setChannelName] = useState("");
   const [channelType, setChannelType] = useState("public");
   const [description, setDescription] = useState("");
@@ -17,293 +23,313 @@ const CreateChannelModal = ({onClose}) => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [_, setSearchParams] = useSearchParams();
 
-  const { client, setActiveChannel } = useChatContext();//from stream
+  const { client, setActiveChannel } = useChatContext(); //from stream
 
-    // fetch users for members selection
-    useEffect(()=>{
-        const fetchUsers = async()=>{
-            if(!client?.user) return;
+  // fetch users for members selection
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!client?.user) return;
 
-            setLoadingUsers(true);
+      setLoadingUsers(true);
 
-            try {
-                const response = await client.queryUsers(
-                    {id: {$ne: client.user.id}},//$ne-not equals, we want to see all the users except ourselves ofc.
-                    {name: 1},//sort them by names in ascending order
-                    {limit: 100}//get first 100 users
-                );
-                setUsers(response.users || [])
-            } catch (error) {
-                console.log("Error fetching users")
-                Sentry.captureException(error, {
-                    tags: {component: "CreateChannelModal"},
-                    extra: {context: "fetch_users_for_channel"}
-                })
-                setUsers([])//make it an empty array if it fails.
-            } finally {
-                setLoadingUsers(false)
-            }
-        }
-        fetchUsers();
-    },[client])
+      try {
+        const response = await client.queryUsers(
+          { id: { $ne: client.user.id } }, //$ne-not equals, we want to see all the users except ourselves ofc.
+          { name: 1 }, //sort them by names in ascending order
+          { limit: 100 }, //get first 100 users
+        );
+        setUsers(response.users || []);
+      } catch (error) {
+        console.log("Error fetching users");
+        Sentry.captureException(error, {
+          tags: { component: "CreateChannelModal" },
+          extra: { context: "fetch_users_for_channel" },
+        });
+        setUsers([]); //make it an empty array if it fails.
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, [client]);
 
-    // reset the form on page load
-    useEffect(()=>{
-        setChannelName("");
-        setDescription("");
-        setChannelType("public");
-        setError("");
-        setSelectedMembers([]);
-    },[])
+  // reset the form on page load
+  // useEffect(() => {
+  //   setChannelName("");
+  //   setDescription("");
+  //   setChannelType("public");
+  //   setError("");
+  //   setSelectedMembers([]);
+  // }, []);
+  // NOT NEEDED.
 
-    // auto-select all users for public channel
-    useEffect(()=>{
-        if(channelType === "public") setSelectedMembers(users.map((u)=>u.id));
-        else setSelectedMembers([]);
-    },[channelType, users])
+  // auto-select all users for public channel
+  useEffect(() => {
+    if (channelType === "public") setSelectedMembers(users.map((u) => u.id));
+    else setSelectedMembers([]);
+  }, [channelType, users]);
 
-    const validateChannelName = (name)=>{
-      if(!name.trim()) return "Channel name is required";
-      if(name.length<3) return "Channel name must be atleast 3 characters";
-      if(name.length>22) return "Channel name can not exceed 22 characters";
-  
-      return "";
+  const validateChannelName = (name) => {
+    if (!name.trim()) return "Channel name is required";
+    if (name.length < 3) return "Channel name must be atleast 3 characters";
+    if (name.length > 22) return "Channel name can not exceed 22 characters";
+
+    return "";
+  };
+
+  const handleChannelNameChange = (e) => {
+    const value = e.target.value;
+    setChannelName(value);
+    setError(validateChannelName(value));
+  };
+
+  const handleMemberToggle = (id) => {
+    if (selectedMembers.includes(id)) {
+      setSelectedMembers(selectedMembers.filter((uid) => uid != id));
+    } else {
+      setSelectedMembers([...selectedMembers, id]);
     }
+    // while selecting members, if the member was already selected then remove him from the selected list(a tick box won't show on the rhs of him)
+    // if not, then just include him in the tickboxes club
+  };
 
-    const handleChannelNameChange = (e)=>{
-        const value = e.target.value;
-        setChannelName(value);
-        setError(validateChannelName(value))
+  const handleSubmit = async (e) => {
+    e.preventDefault(); //prevent the default behaviour so that the page doesn't get reloaded.
+
+    const validationError = validateChannelName(channelName);
+    if (validationError) return setError(validationError);
+
+    if (isCreating || !client?.user) return;
+
+    setIsCreating(true);
+    setError(""); //reset if there were any errors cuz now we'll do
+
+    try {
+      const channelId = channelName
+        .toLowerCase()
+        .trim()
+        .replace(/\s+g/, "-")
+        .replace(/[^a-z0-9-_]/g, "")
+        .slice(0, 20); //we want just first 20 items, these regex were generated by ai.
+
+      // prepare the channel data.
+      const channelData = {
+        name: channelName.trim(), //back and front empty spaces removed
+        created_by_id: client.user.id,
+        members: [client.user.id, ...selectedMembers], //members include current user and all the selectedMembers
+      };
+
+      if (description) channelData.description = description;
+
+      if (channelType === "private") {
+        channelData.private = true;
+        channelData.visibility = "private";
+      } else {
+        channelData.visibility = "public";
+        channelData.discoverable = true;
+      } //custom fields we're adding.
+
+      const channel = client.channel("messaging", channelId, channelData); //creates a new channel,type, id and custom data.
+
+      await channel.watch(); //this is gonna listen for real-time updates.
+
+      //let's also set the recently created channel active.
+      setActiveChannel(channel);
+      setSearchParams({ channel: channelId }); //so that the channel reference still remains in the params from where our app can fetch the info which tells us which channel to show.
+
+      toast.success(`Channel ${channelName} created successfully!`);
+
+      onClose();
+    } catch (error) {
+      console.log("Error creating the channel.");
+    } finally {
+      setIsCreating(false);
     }
-
-    const handleMemberToggle = (id)=>{
-        if(selectedMembers.includes(id)){
-            setSelectedMembers(selectedMembers.filter((uid)=>uid!=id))
-        }else{
-            setSelectedMembers([...selectedMembers,id])
-        }
-        // while selecting members, if the member was already selected then remove him from the selected list(a tick box won't show on the rhs of him)
-        // if not, then just include him in the tickboxes club
-    }
-
-    const handleSubmit = async (e)=>{
-        e.preventDefault();//prevent the default behaviour so that the page doesn't get reloaded.
-
-        const validationError = validateChannelName(channelName);
-        if(validationError) return setError(validationError);
-
-        if(isCreating || !client?.user) return;
-
-        setIsCreating(true);
-        setError("");//reset if there were any errors cuz now we'll do 
-
-        try {
-            const channelId = channelName.toLowerCase().trim().replace(/\s+g/,"-").replace(/[^a-z0-9-_]/g,"").slice(0,20)//we want just first 20 items, these regex were generated by ai.
-
-            // prepare the channel data.
-            const channelData = {
-                name: channelName.trim(),//back and front empty spaces removed
-                created_by_id: client.user.id,
-                members: [client.user.id, ...selectedMembers],//members include current user and all the selectedMembers
-            }
-
-            if(description) channelData.description = description;
-
-            if(channelType === "private") {
-                channelData.private = true;
-                channelData.visibility = "private"
-            } else {
-                channelData.visibility = "public"
-                channelData.discoverable = true;
-            }//custom fields we're adding.
-
-            const channel = client.channel("messaging",channelId, channelData)//creates a new channel,type, id and custom data. 
-             
-            await channel.watch()//this is gonna listen for real-time updates.
-
-            //let's also set the recently created channel active.
-            setActiveChannel(channel);
-            setSearchParams({channel: channelId})//so that the channel reference still remains in the params from where our app can fetch the info which tells us which channel to show.
-
-            toast.success(`Channel ${channelName} created successfully!`)
-
-            onClose();
-
-
-
-        } catch (error) {
-            console.log("Error creating the channel.")
-        } finally {
-            setIsCreating(false)
-        }
-    }
-
-
+  };
 
   return (
     <div className="create-channel-modal-overlay">
-        <div className="create-channel-modal">
-            <div className="create-channel-modal__header">
-                <h2>Create a Channel</h2>
-                <button onClick={onClose} className='create-channel-modal__close'>
-                    <XIcon className='w-5 h-5'/>
-                </button>
-            </div>
-            {/* form */}
-            <form onSubmit={handleSubmit} className='create-channel-modal__form'>
-                {error && (//if there is error then this
-                    <div className="form-error">
-                        <AlertCircleIcon className='w-4 h-4' />
-                        <span>{error}</span>
-                    </div>
-                )}
-
-                {/* Channel name */}
-                <div className="form-group">
-                    <label htmlFor="channelName">Channel Name</label>
-                    <div className="input-with-icon">
-                        <HashIcon className="w-4 h-4 input-icon" />
-                        <input type="text"
-                        id="channelName"
-                        value={channelName}
-                        placeholder='e.g. marketing'
-                        className={`form-input ${error? 'form-input--error': ""}`}
-                        autoFocus 
-                        maxLength={22} 
-                        onChange={handleChannelNameChange}
-                        />
-
-                    </div>
-                    {/* channel id preview */}
-                    {channelName && (
-                        <div className="form-hint">
-                            Channel id will be # {
-                                channelName.toLowerCase().replace(/\s+g/,"-").replace(/[^a-z0-9-_]/g,"")//convert it to lowercase, put -(dashes) in between, replace any characters that are not b/w a-z or 0-9
-                            }
-                        </div>
-                    )}
-                </div>
-                {/* Channel type */}
-                <div className="form-group">
-                    <label>Channel type</label>
-
-                    <div className="radio-group">
-                        <label className="radio-option">
-                            <input 
-                            type="radio" 
-                            value="public" 
-                            checked={channelType === "public"} 
-                            onChange={(e)=>setChannelType(e.target.value)} 
-                            />
-                        
-                        <div className="radio-content">
-                        <HashIcon className='size-4'/>
-                        <div>
-                            <div className="radio-title">Public</div>
-                            <div className="radio-description">Anyone can join this channel</div>
-                        </div>
-                        </div>
-                        </label>
-
-                        <label className="radio-option">
-                        <input
-                        type="radio"
-                        value="private"
-                        checked={channelType === "private"}
-                        onChange={(e) => setChannelType(e.target.value)}
-                        />
-                        <div className="radio-content">
-                        <LockIcon className="size-4" />
-                        <div>
-                            <div className="radio-title">Private</div>
-                            <div className="radio-description">Only invited members can join</div>
-                        </div>
-                        </div>
-                    </label>
-                    </div>
-                </div>
-
-                {/* add members component */}
-                {channelType === "private" && (
-                    <div className="form-group">
-                        <label>Add Members</label>
-                        <div className="member-selection-header">
-                            <button 
-                            type='button' 
-                            className='btn btn-secondary btn-small' 
-                            onClick={()=>setSelectedMembers(users.map((u)=>u.id))} 
-                            disabled={loadingUsers || users.length===0}>
-                                <UsersIcon className="w-4 h-4" />
-                                Select Everyone
-                            </button>
-                            <span className="selected-count">{selectedMembers.length}</span>
-                        </div>
-                        <div className="members-list">
-                            {
-                            loadingUsers ? 
-                            (<p>Loading users</p>)
-                            :users.length===0 ? 
-                            (<p>No users found...</p>)
-                            :(users.map(user => <label key={user.id} className='member-item'>
-                                <input 
-                                type="checkbox" 
-                                checked={selectedMembers.includes(user.id)}
-                                onChange={()=>handleMemberToggle(user.id)} 
-                                className='member-checkbox' />
-
-                                {user.image ? 
-                                (
-                                <img 
-                                src={user.image} 
-                                alt={user.name || user.id} 
-                                className='member-avatar' />
-                                ):
-                                (
-                                    // getting the first letter of the username as the preview.
-                                <div className='member-avatar member-avatar-placeholder'>
-                                    <span>{(user.name || user.id).charAt(0).toUpperCase()}</span>
-                                </div>
-                                )}
-                                
-                                <span className='member-name'>{user.name || user.id}</span>
-                            </label>))
-                            }
-                        </div>
-                    </div>
-                )}
-                {/* description component */}
-                <div className="form-group">
-                <label htmlFor="description">Description (optional)</label>
-                <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="What's this channel about?"
-                className="form-textarea"
-                rows={3}
-                />
-                </div>
-
-                {/* Actions */}
-                <div className="create-channel-modal__actions">
-                <button type="button" onClick={onClose} className="btn btn-secondary">
-                Cancel
-                </button>
-                <button
-                type="submit"
-                disabled={!channelName.trim() || isCreating}
-                className="btn btn-primary"
-                >
-                {isCreating ? "Creating..." : "Create Channel"}
-                </button>
-                </div>
-            </form>
+      <div className="create-channel-modal">
+        <div className="create-channel-modal__header">
+          <h2>Create a Channel</h2>
+          <button onClick={onClose} className="create-channel-modal__close">
+            <XIcon className="w-5 h-5" />
+          </button>
         </div>
+        {/* form */}
+        <form onSubmit={handleSubmit} className="create-channel-modal__form">
+          {error && ( //if there is error then this
+            <div className="form-error">
+              <AlertCircleIcon className="w-4 h-4" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Channel name */}
+          <div className="form-group">
+            <label htmlFor="channelName">Channel Name</label>
+            <div className="input-with-icon">
+              <HashIcon className="w-4 h-4 input-icon" />
+              <input
+                type="text"
+                id="channelName"
+                value={channelName}
+                placeholder="e.g. marketing"
+                className={`form-input ${error ? "form-input--error" : ""}`}
+                autoFocus
+                maxLength={22}
+                onChange={handleChannelNameChange}
+              />
+            </div>
+            {/* channel id preview */}
+            {channelName && (
+              <div className="form-hint">
+                Channel id will be #{" "}
+                {
+                  channelName
+                    .toLowerCase()
+                    .replace(/\s+g/, "-")
+                    .replace(/[^a-z0-9-_]/g, "") //convert it to lowercase, put -(dashes) in between, replace any characters that are not b/w a-z or 0-9
+                }
+              </div>
+            )}
+          </div>
+          {/* Channel type */}
+          <div className="form-group">
+            <label>Channel type</label>
+
+            <div className="radio-group">
+              <label className="radio-option">
+                <input
+                  type="radio"
+                  value="public"
+                  checked={channelType === "public"}
+                  onChange={(e) => setChannelType(e.target.value)}
+                />
+
+                <div className="radio-content">
+                  <HashIcon className="size-4" />
+                  <div>
+                    <div className="radio-title">Public</div>
+                    <div className="radio-description">
+                      Anyone can join this channel
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <label className="radio-option">
+                <input
+                  type="radio"
+                  value="private"
+                  checked={channelType === "private"}
+                  onChange={(e) => setChannelType(e.target.value)}
+                />
+                <div className="radio-content">
+                  <LockIcon className="size-4" />
+                  <div>
+                    <div className="radio-title">Private</div>
+                    <div className="radio-description">
+                      Only invited members can join
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* add members component */}
+          {channelType === "private" && (
+            <div className="form-group">
+              <label>Add Members</label>
+              <div className="member-selection-header">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-small"
+                  onClick={() => setSelectedMembers(users.map((u) => u.id))}
+                  disabled={loadingUsers || users.length === 0}
+                >
+                  <UsersIcon className="w-4 h-4" />
+                  Select Everyone
+                </button>
+                <span className="selected-count">{selectedMembers.length}</span>
+              </div>
+              <div className="members-list">
+                {loadingUsers ? (
+                  <p>Loading users</p>
+                ) : users.length === 0 ? (
+                  <p>No users found...</p>
+                ) : (
+                  users.map((user) => (
+                    <label key={user.id} className="member-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedMembers.includes(user.id)}
+                        onChange={() => handleMemberToggle(user.id)}
+                        className="member-checkbox"
+                      />
+
+                      {user.image ? (
+                        <img
+                          src={user.image}
+                          alt={user.name || user.id}
+                          className="member-avatar"
+                        />
+                      ) : (
+                        // getting the first letter of the username as the preview.
+                        <div className="member-avatar member-avatar-placeholder">
+                          <span>
+                            {(user.name || user.id).charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+
+                      <span className="member-name">
+                        {user.name || user.id}
+                      </span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+          {/* description component */}
+          <div className="form-group">
+            <label htmlFor="description">Description (optional)</label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What's this channel about?"
+              className="form-textarea"
+              rows={3}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="create-channel-modal__actions">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!channelName.trim() || isCreating}
+              className="btn btn-primary"
+            >
+              {isCreating ? "Creating..." : "Create Channel"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  )
-}
+  );
+};
 // now go and try creating the channel throught the frontend, and then in your stream account you'll see the channel and all it's info like visibility n shi, also it will have the
 // custom field we added->discoverable,rn we have done the homepage channel setup now in next section we'll do homepage's direct messages setup
 // go to homepage and there we'll implement the channelList component.
 
-export default CreateChannelModal
+export default CreateChannelModal;
