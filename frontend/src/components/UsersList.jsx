@@ -140,5 +140,5 @@ await channel.watch();
 //also when the channel has some new/unread messages then the notification icon doesn't pop up on that channel, we fix that first.
 // in customChannelPreview, instead of channel.unreadCount do channel.countUnread()
 // now all functionalities are working and in next commit we'll work on channel header
-
+//customChannelHeader.jsx
 export default UsersList
