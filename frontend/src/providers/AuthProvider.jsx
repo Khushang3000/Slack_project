@@ -1,46 +1,46 @@
 import { useEffect, createContext } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import {axiosInstance} from '../lib/axios.js';
-import toast from 'react-hot-toast';
+import { axiosInstance } from "../lib/axios.js";
+import toast from "react-hot-toast";
 
-const AuthContext = createContext({})
+const AuthContext = createContext({});
 
-export default function AuthProvider({children}){
-    const {getToken} = useAuth();
+export default function AuthProvider({ children }) {
+  const { getToken } = useAuth();
 
-    useEffect(()=>{
-        //setup axios interceptor
-        const interceptor = axiosInstance.interceptors.request.use(
-            async (config)=>{
-                try {
-                    const token = await getToken();
-                    if(token) config.headers.Authorization = `Bearer ${token}`
-                    //we're basically adding our token under the bearer key, so basically by doing this backend will know if we're authenticated by checking whether this token is valid or not.
-
-
-                } catch (error) {
-                    if(error.message?.includes("auth") || error.message?.includes("token")){
-                        toast.error("Authentication issue. Please Refresh the Page.")
-                    }
-                    console.log("Error getting the token.", error)
-                }
-                return config;
-            },
-            (error)=>{
-                //this 2nd arg is an error handler.
-                console.error("Axios request error: ", error);
-                return Promise.reject(error)
-            }
-        )
-
-        //cleanup function to remove interceptor, this is important to avoid memory leaks.
-        return ()=>{
-            axiosInstance.interceptors.request.eject(interceptor)
+  useEffect(() => {
+    //setup axios interceptor
+    const interceptor = axiosInstance.interceptors.request.use(
+      async (config) => {
+        try {
+          const token = await getToken();
+          if (token) config.headers.Authorization = `Bearer ${token}`;
+          //we're basically adding our token under the bearer key, so basically by doing this backend will know if we're authenticated by checking whether this token is valid or not.
+        } catch (error) {
+          if (
+            error.message?.includes("auth") ||
+            error.message?.includes("token")
+          ) {
+            toast.error("Authentication issue. Please Refresh the Page.");
+          }
+          console.log("Error getting the token.", error);
         }
-    },[getToken])//every single time getToken method is called useEffect will run.
+        return config;
+      },
+      (error) => {
+        //this 2nd arg is an error handler.
+        console.error("Axios request error: ", error);
+        return Promise.reject(error);
+      },
+    );
 
+    //cleanup function to remove interceptor, this is important to avoid memory leaks.
+    return () => {
+      axiosInstance.interceptors.request.eject(interceptor);
+    };
+  }, [getToken]); //every single time getToken method is called useEffect will run.
 
-    return <AuthContext.Provider value={{}}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{}}>{children}</AuthContext.Provider>;
 }
 
 // so here we have created a context, and we're using the useAuth hook, so that we can get the token, if we have the token then we include that token in our headers,

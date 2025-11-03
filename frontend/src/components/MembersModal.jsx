@@ -7,7 +7,10 @@ function MembersModal({ members, onClose }) {
         {/* HEADER */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-2xl font-semibold">Channel Members</h2>
-          <button onClick={onClose} className="text-2xl text-gray-500 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            className="text-2xl text-gray-500 hover:text-gray-700"
+          >
             <XIcon className="w-5 h-5" />
           </button>
         </div>
@@ -28,7 +31,9 @@ function MembersModal({ members, onClose }) {
               ) : (
                 <div className="size-9 rounded-full bg-gray-400 flex items-center justify-center">
                   <span className="text-white">
-                    {(member.user.name || member.user.id).charAt(0).toUpperCase()}
+                    {(member.user.name || member.user.id)
+                      .charAt(0)
+                      .toUpperCase()}
                   </span>
                 </div>
               )}
