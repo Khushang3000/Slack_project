@@ -148,5 +148,5 @@ const InviteModal = ({ channel, onClose }) => {
         // )}
 // this means that whenever isCreateModal is open the CreateChannelModal will rerender from the start, which means that all the fields would take their default values anyways.
 // alright now the createChannelHeader is completed. now in next commit we'll work on adding the video calling functionality.
-
+//so go to the callPage.jsx, so when user visits /call/:id then we call that callPage.jsx(see in app.jsx)
 export default InviteModal;
