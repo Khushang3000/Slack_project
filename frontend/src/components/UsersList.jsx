@@ -21,6 +21,7 @@ const UsersList = ({ activeChannel }) => {
       { limit: 20 },
     );
 
+    // this is because while fetching users, for some reason stream also fetches the call id(video call), so we're just filtering it out.
     const usersOnly = response.users.filter(
       (user) => !user.id.startsWith("recording-"),
     );
