@@ -15,7 +15,7 @@ const app = express();
 
 app.use(express.json())//this allows you to req.body where you have some json data.
 
-// const PORT=process.env.PORT||5001;
+// const PORT=process.env.PORT||5001;, added localhost as client url for bug checking in the frontend.
 app.use(cors({origin: ENV.CLIENT_URL, credentials: true}))//credentials: true allows users to send cookies, in which they can send the token
 
 
