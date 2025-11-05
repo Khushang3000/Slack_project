@@ -19,7 +19,7 @@ import CreateChannelModal from "../components/CreateChannelModal";
 import { HashIcon, UsersIcon } from "lucide-react";
 import CustomChannelPreview from "../components/CustomChannelPreview";
 import UsersList from "../components/UsersList";
-import CustomChannelHeader from "../components/customChannelHeader";
+import CustomChannelHeader from "../components/CustomChannelHeader";
 
 const HomePage = () => {
   // this state will help us show users a modal, when they click the create channel button.
