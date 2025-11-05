@@ -38,7 +38,14 @@ const CreateChannelModal = ({ onClose }) => {
           { name: 1 }, //sort them by names in ascending order
           { limit: 100 }, //get first 100 users
         );
-        setUsers(response.users || []);
+        const usersOnly = response.users.filter(
+        (user) => !user.id.startsWith("recording-"),
+        );
+
+        
+        setUsers(usersOnly || []);
+
+        
       } catch (error) {
         console.log("Error fetching users");
         Sentry.captureException(error, {

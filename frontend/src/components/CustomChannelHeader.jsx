@@ -135,4 +135,9 @@ const CustomChannelHeader = () => {
   );
 };
 
+// now we'll deploy the app we've updated the env variables of modes to production from development.
+// and as we already have our backend deployed, it's time to deploy the frontend.
+// and the same thing that we did with usersList (removing the -recording user, we also have to do that in)
+// also in backend server.js
+// and some other things, also, we need to add the vercel.json file so that our app doesn't break while navigating to different pages.
 export default CustomChannelHeader;

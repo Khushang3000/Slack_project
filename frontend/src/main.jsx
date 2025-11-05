@@ -32,7 +32,7 @@ if (!PUBLISHABLE_KEY) {
 // using it in the clerkprovider component.
 
 Sentry.init({
-  dsn: "https://3b07b8595c7a7f968ad2991c0b2f6358@o4510073516916736.ingest.us.sentry.io/4510261809577984",
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [
     Sentry.reactRouterV7BrowserTracingIntegration({
       useEffect: React.useEffect,
