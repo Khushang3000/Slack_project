@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json())//this allows you to req.body where you have some json data.
 
 // const PORT=process.env.PORT||5001;
-app.use(cors({origin: "http://localhost:5173", credentials: true}))//credentials: true allows users to send cookies, in which they can send the token
+app.use(cors({origin: `${ENV.CLIENT_URL}`, credentials: true}))//credentials: true allows users to send cookies, in which they can send the token
 
 
 // console.log('Mongodb url is', ENV.MONGODB_URI)//this runs on the server file, when this server file runs, and the .get is through express router.
