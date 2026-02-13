@@ -9,7 +9,8 @@ export const upsertStreamUser = async (userData) => {//function that we'll run w
         console.log("Stream user upserted successfully",userData.name);
         return userData
     } catch (error) {
-        console.error("Error upserting the stream user", error)
+        console.error("Error upserting the stream user", error);
+        throw error;
     }
 }
 
@@ -18,7 +19,8 @@ export const deleteStreamUser = async (userId) => {//function that we'll run whe
         await streamClient.deleteUser(userId);
         console.log("Stream user deleted successfully");
     } catch (error) {
-        console.error("Error deleting the stream user", error)
+        console.error("Error deleting the stream user", error);
+        throw error;
     }
 }
 
@@ -40,9 +42,14 @@ export const generateStreamToken = (userId) => {
 
 
 export const addUserToPublicChannels = async (newUserId) => {//adding the user to public channels.
-  const publicChannels = await streamClient.queryChannels({ discoverable: true });
+  try {
+    const publicChannels = await streamClient.queryChannels({ discoverable: true });
 
-  for (const channel of publicChannels) {
-    await channel.addMembers([newUserId]);
+    for (const channel of publicChannels) {
+      await channel.addMembers([newUserId]);
+    }
+  } catch (error) {
+    console.error("Error adding user to public channels:", error);
+    throw error;
   }
 };

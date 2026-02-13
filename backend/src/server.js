@@ -28,7 +28,7 @@ app.use(clerkMiddleware())//with this we can basically check if the user is auth
 // Use requireAuth() to protect this route
 // If user isn't authenticated, requireAuth() will redirect back to the homepage
 
-app.get("debug-sentry",(req, res)=>{
+app.get("/debug-sentry",(req, res)=>{
     throw new Error("My First Sentry Error.")
 })
 

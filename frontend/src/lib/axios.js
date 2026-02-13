@@ -15,7 +15,14 @@ import axios from "axios";
 //     ? "http://localhost:5001/api"
 //     : "https://slack-backend-flame.vercel.app/api";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.MODE === "development" 
+    ? "http://localhost:5001/api" 
+    : "");
+
+if (!BASE_URL) {
+  console.error("API_BASE_URL is not configured. Please set VITE_API_BASE_URL in your environment.");
+}
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,

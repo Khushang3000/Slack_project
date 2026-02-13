@@ -74,7 +74,7 @@ export const useStreamChat = () => {
       // this means when the tab was closed, so when the app is closed, it means that user is offline, and that's why we're using this disconnectUser.
       if (chatClient) chatClient.disconnectUser();
     };
-  }, [tokenData, user, chatClient]); //run it whenever tokenData or user changes.
+  }, [tokenData, user]); //removed chatClient from dependencies to prevent infinite loop
 
   return { chatClient, tokenLoading, tokenError }; //now we'll be using these fields in ui, later.
   // now in next commit we'll work on the homepage ui.

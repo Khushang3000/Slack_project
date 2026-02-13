@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useSearchParams } from "react-router";
 import { useChatContext } from "stream-chat-react";
-
+import toast from "react-hot-toast";
 import * as Sentry from "@sentry/react";
 import { CircleIcon } from "lucide-react";
 
@@ -63,7 +63,8 @@ const UsersList = ({ activeChannel }) => {
       //listen for live events.
       setSearchParams({ channel: channel.id }); //immediately updating the url as soon as we hit the chat.
     } catch (error) {
-      console.log("Error creating DM", error);
+      console.error("Error creating DM:", error);
+      toast.error("Failed to start direct message. Please try again.");
       Sentry.captureException(error, {
         tags: { component: "UsersList" },
         extra: {

@@ -10,5 +10,6 @@ export async function getStreamToken() {
   } catch (error) {
     console.error("Error fetching stream token:", error.message);
     console.error("Full error object:", error);
+    throw error; // Re-throw to let the caller handle the error
   }
 }

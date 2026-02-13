@@ -16,26 +16,30 @@ const syncUser = inngest.createFunction(//in this function we basically will jus
         // //first thing we'll do is connect with our database.
         // await connectDB();
         //NO NEED TO CONNECT TO THE DATABASE AS WE ALREADY DID THAT IN THE SERVER.JS, AS THE DATABASE CONNECTS AS SOON AS THE APP LISTENS ON A SERVER.
-        const {id, email_addresses, first_name, last_name, image_url} = event.data;//if you remember in event catalog this is the kinda data we saw.
+        try {
+            const {id, email_addresses, first_name, last_name, image_url} = event.data;//if you remember in event catalog this is the kinda data we saw.
 
-        const newUser = {
-            clerkId: id,
-            email: email_addresses[0]?.email_address,
-            name: `${first_name || ""} ${last_name || ""}`,
-            image: image_url
+            const newUser = {
+                clerkId: id,
+                email: email_addresses[0]?.email_address,
+                name: `${first_name || ""} ${last_name || ""}`,
+                image: image_url
 
-        };
+            };
 
-        await User.create(newUser);
+            await User.create(newUser);
 
-        await upsertStreamUser({
-            id: newUser.clerkId.toString(),
-            name: newUser.name,
-            image: newUser.image
-        })
+            await upsertStreamUser({
+                id: newUser.clerkId.toString(),
+                name: newUser.name,
+                image: newUser.image
+            })
 
-        await addUserToPublicChannels(newUser.clerkId.toString())//see the method in stream.js.
-
+            await addUserToPublicChannels(newUser.clerkId.toString())//see the method in stream.js.
+        } catch (error) {
+            console.error("Error syncing user from Clerk to database:", error);
+            throw error;
+        }
     }
 
 
@@ -48,10 +52,15 @@ const deleteUserFromDB = inngest.createFunction(//in this function we basically 
     {id: "delete-user-from-db"},
     {event: "clerk/user.deleted"},
     async ({event})=>{
-       const {id} = event.data;
-       await User.deleteOne({clerkId: id})
+       try {
+           const {id} = event.data;
+           await User.deleteOne({clerkId: id})
 
-       await deleteStreamUser(id.toString());
+           await deleteStreamUser(id.toString());
+       } catch (error) {
+           console.error("Error deleting user from database:", error);
+           throw error;
+       }
     }
 
 
