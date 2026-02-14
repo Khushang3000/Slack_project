@@ -1,13 +1,18 @@
 import mongoose from 'mongoose';
 import { ENV } from './env.js';
+import * as Sentry from '@sentry/node';
 
-export const connectDB =async ()=>{
+export const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(ENV.MONGODB_URI)
-        // console.log("Mongodb connected successfully.", conn.connection.host)
-        //as we don't need to see the host in our console log
+        const conn = await mongoose.connect(ENV.MONGODB_URI);
+        console.log("MongoDB connected successfully.");
+        return conn;
     } catch (error) {
-        console.log("Error connecting to mongodb.", error);
-        process.exit(1);//status code 1 means error and 0 means success.
+        console.error("Error connecting to MongoDB:", error.message);
+        Sentry.captureException(error, {
+            tags: { component: "db.config" },
+            extra: { context: "database_connection", mongoUri: ENV.MONGODB_URI ? "present" : "missing" },
+        });
+        process.exit(1);
     }
-}//now let's call this connect to db function in server.js.
+}

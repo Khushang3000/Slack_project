@@ -3,8 +3,7 @@ import express from 'express';
 import dotenv from "dotenv";
 import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
-import { clerkMiddleware, requireAuth, getAuth} from '@clerk/express'
-
+import { clerkMiddleware, requireAuth } from '@clerk/express'
 import { functions, inngest } from './config/inngest.js';
 import { serve } from "inngest/express";
 import chatRoutes from './routes/chat.route.js'

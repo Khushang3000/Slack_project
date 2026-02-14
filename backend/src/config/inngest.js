@@ -1,33 +1,31 @@
 import { Inngest } from "inngest";
-import { connectDB } from "./db.js";
 import { User } from "../models/user.model.js";
 import { addUserToPublicChannels, deleteStreamUser, upsertStreamUser } from "./stream.js";
+import * as Sentry from '@sentry/node';
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "slack-clone" });
 
-
-const syncUser = inngest.createFunction(//in this function we basically will just take the user from clerk and save the user in the database.
+const syncUser = inngest.createFunction(
     {id: "sync-user"},
     {event: "clerk/user.created"},
     async ({event})=>{
-        //this is the function where we save the user in the database, so firstly let's create a user model. User.js or user.model.js
-
-        // //first thing we'll do is connect with our database.
-        // await connectDB();
-        //NO NEED TO CONNECT TO THE DATABASE AS WE ALREADY DID THAT IN THE SERVER.JS, AS THE DATABASE CONNECTS AS SOON AS THE APP LISTENS ON A SERVER.
         try {
-            const {id, email_addresses, first_name, last_name, image_url} = event.data;//if you remember in event catalog this is the kinda data we saw.
+            const {id, email_addresses, first_name, last_name, image_url} = event.data;
+
+            if (!id || !email_addresses?.[0]?.email_address) {
+                throw new Error("Invalid user data from Clerk webhook");
+            }
 
             const newUser = {
                 clerkId: id,
-                email: email_addresses[0]?.email_address,
-                name: `${first_name || ""} ${last_name || ""}`,
-                image: image_url
-
+                email: email_addresses[0].email_address,
+                name: `${first_name || ""} ${last_name || ""}`.trim(),
+                image: image_url || ""
             };
 
             await User.create(newUser);
+            console.log("User synced to database:", newUser.clerkId);
 
             await upsertStreamUser({
                 id: newUser.clerkId.toString(),
@@ -35,41 +33,43 @@ const syncUser = inngest.createFunction(//in this function we basically will jus
                 image: newUser.image
             })
 
-            await addUserToPublicChannels(newUser.clerkId.toString())//see the method in stream.js.
+            await addUserToPublicChannels(newUser.clerkId.toString())
         } catch (error) {
-            console.error("Error syncing user from Clerk to database:", error);
+            console.error("Error syncing user from Clerk to database:", error.message);
+            Sentry.captureException(error, {
+                tags: { component: "inngest.syncUser" },
+                extra: { context: "sync_user_from_clerk", clerkId: event.data?.id },
+            });
             throw error;
         }
     }
+)
 
-
-)//and this was the function on how we can create the user.
-
-
-// function to delete the user.
-
-const deleteUserFromDB = inngest.createFunction(//in this function we basically will just take the user from clerk and save the user in the database.
+const deleteUserFromDB = inngest.createFunction(
     {id: "delete-user-from-db"},
     {event: "clerk/user.deleted"},
     async ({event})=>{
        try {
            const {id} = event.data;
-           await User.deleteOne({clerkId: id})
+           
+           if (!id) {
+               throw new Error("Invalid user ID from Clerk webhook");
+           }
+           
+           await User.deleteOne({clerkId: id});
+           console.log("User deleted from database:", id);
 
            await deleteStreamUser(id.toString());
        } catch (error) {
-           console.error("Error deleting user from database:", error);
+           console.error("Error deleting user from database:", error.message);
+           Sentry.captureException(error, {
+               tags: { component: "inngest.deleteUserFromDB" },
+               extra: { context: "delete_user_from_clerk", clerkId: event.data?.id },
+           });
            throw error;
        }
     }
-
-
 )
 
-
-
-
-// Create an array where we'll export future Inngest functions
-export const functions = [syncUser, deleteUserFromDB];//here we'll put functions like create user in database or delete or update the user in the database.
-
-//now that we have setup our functions let's see the next step in the inngest documentation and go back to 
+// Create an array of Inngest functions for event handling
+export const functions = [syncUser, deleteUserFromDB];
